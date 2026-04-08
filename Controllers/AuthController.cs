@@ -1,5 +1,6 @@
 using JwtAuthPlayground.Data;
 using JwtAuthPlayground.Dtos;
+using JwtAuthPlayground.JwtTokenHandling;
 using JwtAuthPlayground.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ namespace JwtAuthPlayground.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(AppDbContext _db) : ControllerBase
+public class AuthController(AppDbContext _db, JwtTokenHandler _tokenHandler) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<ActionResult<UserSummary>> Register(RegisterUserRequest request)
@@ -44,6 +45,12 @@ public class AuthController(AppDbContext _db) : ControllerBase
             return Unauthorized("Invalid username or password");
 
         // build jwt token and return it (not as cookie bcus that couples ur clients to web browsers, but rather return it normally as a dto)
+        var now = DateTimeOffset.UtcNow;
+        long issuedAt = now.ToUnixTimeSeconds();
+        long expiresAt = now.AddMinutes(2).ToUnixTimeSeconds();
+        var token = _tokenHandler.GenerateToken(user.Id, expiresAt, issuedAt);
+        var resp = new LoginUserResponse(token);
+        return Ok(resp);
     }
 
     // need logout endpoint also

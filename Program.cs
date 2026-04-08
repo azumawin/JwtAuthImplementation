@@ -1,5 +1,6 @@
 using DotNetEnv;
 using JwtAuthPlayground.Data;
+using JwtAuthPlayground.JwtTokenHandling;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Scalar.AspNetCore;
@@ -14,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
+builder.Services.AddSingleton<JwtTokenHandler>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
