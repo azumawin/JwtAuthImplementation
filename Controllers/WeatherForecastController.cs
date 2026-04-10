@@ -1,3 +1,4 @@
+using JwtAuthPlayground.JwtTokenHandling.Dtos;
 using JwtAuthPlayground.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,5 +34,13 @@ public class WeatherForecastController : ControllerBase
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)],
             })
             .ToArray();
+    }
+
+    [HttpGet("TestingSmth")]
+    public IActionResult TestingSmth()
+    {
+        HttpContext.Items.TryGetValue("isValidJwt", out var valid);
+        HttpContext.Items.TryGetValue("payload", out var pl);
+        return Ok(new { valid, pl });
     }
 }

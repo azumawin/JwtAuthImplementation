@@ -10,7 +10,7 @@ namespace JwtAuthPlayground.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(AppDbContext _db, JwtTokenHandler _tokenHandler) : ControllerBase
+public class AuthController(AppDbContext _db) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<ActionResult<UserSummary>> Register(RegisterUserRequest request)
@@ -41,17 +41,15 @@ public class AuthController(AppDbContext _db, JwtTokenHandler _tokenHandler) : C
         var user = await _db.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
 
         // vulnerability: an attacker can know whether the account with this username exists or not based on response time
+        // but i don't want to be schizo
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return Unauthorized("Invalid username or password");
 
-        // build jwt token and return it (not as cookie bcus that couples ur clients to web browsers, but rather return it normally as a dto)
         var now = DateTimeOffset.UtcNow;
         long issuedAt = now.ToUnixTimeSeconds();
-        long expiresAt = now.AddMinutes(2).ToUnixTimeSeconds();
-        var token = _tokenHandler.GenerateToken(user.Id, expiresAt, issuedAt);
-        var resp = new LoginUserResponse(token);
+        long expiresAt = now.AddMinutes(10).ToUnixTimeSeconds();
+        var jwtAccessToken = JwtTokenHandler.GenerateToken(user.Id, expiresAt, issuedAt);
+        var resp = new LoginUserResponse(jwtAccessToken);
         return Ok(resp);
     }
-
-    // need logout endpoint also
 }
