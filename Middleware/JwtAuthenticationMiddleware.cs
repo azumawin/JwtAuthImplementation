@@ -1,4 +1,3 @@
-using System.Globalization;
 using JwtAuthPlayground.JwtTokenHandling;
 using JwtAuthPlayground.JwtTokenHandling.Dtos;
 
@@ -10,7 +9,7 @@ public class JwtAuthenticationMiddleware(RequestDelegate _next)
     {
         var jwtToken = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
         bool result = JwtTokenHandler.IsValidToken(jwtToken);
-        context.Items.Add("isValidJwt", result); // mby kidna pointless since i could attach payload iff token is legit and determine based on taht but this is more clear mby.
+        context.Items.Add("isValidJwt", result);
 
         if (!result)
         {
