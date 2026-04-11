@@ -73,6 +73,17 @@ public static class JwtTokenHandler
         return true;
     }
 
+    public static T? GetPayload<T>(string jwtToken)
+    {
+        string[] parts = jwtToken.Split('.');
+        if (parts.Length != 3)
+            throw new FormatException(
+                "The token doesn't have 3 parts seperated by a \".\" character."
+            );
+
+        return FromJsonBase64Url<T>(parts[1]);
+    }
+
     private static string ToJsonBase64Url<T>(T obj)
     {
         string json = JsonSerializer.Serialize(obj, _serializerOptions);

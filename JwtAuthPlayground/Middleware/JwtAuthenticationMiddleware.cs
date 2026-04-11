@@ -17,8 +17,7 @@ public class JwtAuthenticationMiddleware(RequestDelegate _next)
             return;
         }
 
-        string[] parts = jwtToken.Split('.');
-        JwtTokenPayload? payload = Base64UrlConverter.FromBase64Url<JwtTokenPayload>(parts[1]);
+        JwtTokenPayload? payload = JwtTokenHandler.GetPayload<JwtTokenPayload>(jwtToken);
         context.Items.Add("payload", payload);
 
         await _next(context);
