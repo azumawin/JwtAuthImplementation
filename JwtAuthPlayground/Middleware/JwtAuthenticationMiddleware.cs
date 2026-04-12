@@ -5,10 +5,10 @@ namespace JwtAuthPlayground.Middleware;
 
 public class JwtAuthenticationMiddleware(RequestDelegate _next)
 {
-    public async Task Invoke(HttpContext context)
+    public async Task Invoke(HttpContext context, JwtTokenHandler _jwtHandler)
     {
         var jwtToken = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-        bool result = JwtTokenHandler.IsValidToken(jwtToken);
+        bool result = _jwtHandler.IsValidToken(jwtToken);
         context.Items.Add("isValidJwt", result);
 
         if (!result)

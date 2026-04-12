@@ -10,7 +10,7 @@ namespace JwtAuthPlayground.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(AppDbContext _db) : ControllerBase
+public class AuthController(AppDbContext _db, JwtTokenHandler _jwtHandler) : ControllerBase
 {
     [HttpPost("register")]
     public async Task<ActionResult<UserSummary>> Register(RegisterUserRequest request)
@@ -48,7 +48,7 @@ public class AuthController(AppDbContext _db) : ControllerBase
         var now = DateTimeOffset.UtcNow;
         long issuedAt = now.ToUnixTimeSeconds();
         long expiresAt = now.AddMinutes(10).ToUnixTimeSeconds();
-        var jwtAccessToken = JwtTokenHandler.GenerateToken(user.Id, expiresAt, issuedAt);
+        var jwtAccessToken = _jwtHandler.GenerateToken(user.Id, expiresAt, issuedAt);
         var resp = new LoginUserResponse(jwtAccessToken);
         return Ok(resp);
     }
