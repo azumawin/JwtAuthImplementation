@@ -48,7 +48,7 @@ public class AuthController(AppDbContext _db, JwtTokenHandler _jwtHandler) : Con
         var now = DateTimeOffset.UtcNow;
         long issuedAt = now.ToUnixTimeSeconds();
         long expiresAt = now.AddMinutes(10).ToUnixTimeSeconds();
-        var jwtAccessToken = _jwtHandler.GenerateToken(user.Id, expiresAt, issuedAt);
+        var jwtAccessToken = _jwtHandler.GenerateToken(user.Id, expiresAt);
         var resp = new LoginUserResponse(jwtAccessToken);
         return Ok(resp);
     }

@@ -17,7 +17,7 @@ public class JwtAuthenticationMiddleware(RequestDelegate _next)
             return;
         }
 
-        JwtTokenPayload? payload = JwtTokenHandler.GetPayload<JwtTokenPayload>(jwtToken);
+        JwtTokenPayload? payload = JwtTokenHandler.TryGetPayload(jwtToken);
         context.Items.Add("payload", payload);
 
         await _next(context);

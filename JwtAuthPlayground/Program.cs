@@ -15,7 +15,7 @@ if (DB_CONN_STRING is null || SECRET_KEY is null)
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(DB_CONN_STRING));
-builder.Services.AddSingleton(_ => new JwtTokenHandler(SECRET_KEY));
+builder.Services.AddSingleton(_ => new JwtTokenHandler(SECRET_KEY, TimeProvider.System));
 builder.Services.AddOpenApi();
 var app = builder.Build();
 
