@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="JwtAuthPlayground.Tests/JwtAuthPlayground.Tests.csproj" />
-  <Project Path="JwtAuthPlayground/JwtAuthPlayground.csproj" />
+  <Project Path="JwtAuthImplementation.Tests/JwtAuthImplementation.Tests.csproj" />
+  <Project Path="JwtAuthImplementation/JwtAuthImplementation.csproj" />
 </Solution>
