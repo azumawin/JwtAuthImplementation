@@ -10,8 +10,6 @@ public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenReques
     {
         AuthConfig config = options.Value;
 
-        RuleFor(rtr => rtr.RefreshTokenBase64Url)
-            .NotEmpty()
-            .Must(token => Base64Url.IsValid(token));
+        RuleFor(rtr => rtr.RefreshToken).NotEmpty().Must(token => Base64Url.IsValid(token));
     }
 }

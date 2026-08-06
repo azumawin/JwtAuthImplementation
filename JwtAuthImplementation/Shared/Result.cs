@@ -1,4 +1,4 @@
-namespace JwtAuthImplementation.Auth;
+namespace JwtAuthImplementation.Shared;
 
 public class Result<TValue, TError>
 {

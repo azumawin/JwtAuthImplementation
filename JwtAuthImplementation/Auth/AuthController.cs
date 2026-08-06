@@ -40,7 +40,7 @@ public class AuthController(AuthService _authService) : ControllerBase
         RefreshTokenRequest request
     )
     {
-        var result = await _authService.RefreshSessionAsync(request.RefreshTokenBase64Url);
+        var result = await _authService.RefreshSessionAsync(request.RefreshToken);
         if (!result.IsSuccess)
         {
             if (result.Error == RefreshTokenError.InvalidFormat)

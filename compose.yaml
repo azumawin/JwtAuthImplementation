@@ -1,0 +1,37 @@
+# expected build context: root of project, same dir like appsettings.json
+
+services:
+  backend:
+    build:
+      context: ./JwtAuthImplementation/
+      dockerfile: Dockerfile
+    environment:
+      Db__ConnString: "Host=db;Port=5432;Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Database=${POSTGRES_DB}"
+      Auth__SecretKey: ${Auth__SecretKey}
+      ASPNETCORE_ENVIRONMENT: Development # should be prod but i wanna see if scalar works
+      ASPNETCORE_URLS: "http://+:5216" # force this port by injecting it into env vars instead of relying on launch settings profile
+    ports:
+      - "5216:5216"
+    depends_on: 
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - jwtimplementation_pgdata:/var/lib/postgresql/
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+    
+volumes:
+  jwtimplementation_pgdata:
+  
+
