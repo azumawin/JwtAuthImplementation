@@ -14,9 +14,10 @@ public class JwtHandlerTests
     [Fact]
     public void GenerateToken_GeneratesCorrectToken()
     {
+        // coupled to SecretKey
         string token = _jwtHandler.GenerateToken(1, 2);
         string expected =
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImV4cCI6MiwiaWF0IjotNjIxMzU1OTYyMDAsImlzcyI6Ikp3dEF1dGhQbGF5Z3JvdW5kIn0.1yZ3kYxxaSrLjv4cYBbt7XYyGlJNQBCy6OCz8jIJu74";
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImV4cCI6MiwiaWF0IjotNjIxMzU1OTYyMDAsImlzcyI6Ikp3dEF1dGhJbXBsZW1lbnRhdGlvbiJ9.Gzg1PhGQttooyL8N1YAwdY-d7gMn3hM1PX7JlOAhvas";
         Assert.Equal(expected, token);
     }
 

@@ -7,17 +7,14 @@ using JwtAuthImplementation.Auth.Dtos;
 using JwtAuthImplementation.Auth.JwtHandling;
 using JwtAuthImplementation.Data;
 using JwtAuthImplementation.Models;
+using JwtAuthImplementation.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace JwtAuthImplementation.Auth;
 
-public class AuthService(
-    AppDbContext _db,
-    IOptions<AuthConfig> options,
-    JwtHandler _jwtHandler
-)
+public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHandler _jwtHandler)
 {
     private static readonly string _dummyHash = BCrypt.Net.BCrypt.HashPassword(
         "DummyHashToPreventTimingAttacks"

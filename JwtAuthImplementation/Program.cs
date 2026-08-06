@@ -1,4 +1,3 @@
-using DotNetEnv;
 using FluentValidation;
 using JwtAuthImplementation.Auth;
 using JwtAuthImplementation.Auth.Dtos.Validation;
@@ -11,11 +10,10 @@ using Serilog;
 using Serilog.Events;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
-Env.Load();
-
 var builder = WebApplication.CreateBuilder(args);
 string? DB_CONN_STRING = builder.Configuration["Db:ConnString"];
 string? SECRET_KEY = builder.Configuration["Auth:SecretKey"];
+
 if (DB_CONN_STRING is null || SECRET_KEY is null)
     throw new InvalidOperationException("env vars not set.");
 
