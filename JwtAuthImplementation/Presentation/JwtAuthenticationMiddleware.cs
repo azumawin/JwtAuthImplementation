@@ -1,7 +1,7 @@
-using JwtAuthImplementation.Auth.JwtHandling;
 using JwtAuthImplementation.Auth.JwtHandling.Dtos;
+using JwtAuthImplementation.Domain;
 
-namespace JwtAuthImplementation.Auth;
+namespace JwtAuthImplementation.Presentation;
 
 public class JwtAuthenticationMiddleware(RequestDelegate _next)
 {

@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace JwtAuthImplementation.Auth;
+namespace JwtAuthImplementation.Domain.Config;
 
 public class AuthConfigValidator : AbstractValidator<AuthConfig>
 {
@@ -11,6 +11,7 @@ public class AuthConfigValidator : AbstractValidator<AuthConfig>
         RuleFor(ac => ac.AccessTokenLifetimeMinutes).NotEqual(0);
         RuleFor(ac => ac.RefreshTokenLifetimeDays).NotEqual(0);
         RuleFor(ac => ac.RefreshTokenSizeBytes).NotEqual(0);
+        RuleFor(ac => ac.MinUsernameLength).NotEqual(0);
         RuleFor(ac => ac.MaxUsernameLength).NotEqual(0);
         RuleFor(ac => ac.MinPasswordLength).NotEqual(0);
         RuleFor(ac => ac.MaxPasswordLength).NotEqual(0);

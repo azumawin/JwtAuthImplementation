@@ -3,23 +3,23 @@
  */
 using System.Buffers.Text;
 using System.Security.Cryptography;
-using JwtAuthImplementation.Auth.Dtos;
-using JwtAuthImplementation.Auth.JwtHandling;
-using JwtAuthImplementation.Data;
-using JwtAuthImplementation.Models;
+using JwtAuthImplementation.Domain;
 using JwtAuthImplementation.Shared;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Npgsql;
 
-namespace JwtAuthImplementation.Auth;
+namespace JwtAuthImplementation.Application;
 
-public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHandler _jwtHandler)
+public class AuthService(
+    IUserRepository _userRepository,
+    IRefreshTokenRepository _refreshTokenRepository,
+    IOptions<AuthConfig> _options,
+    JwtService _jwtHandler
+)
 {
     private static readonly string _dummyHash = BCrypt.Net.BCrypt.HashPassword(
         "DummyHashToPreventTimingAttacks"
     );
-    private readonly AuthConfig _config = options.Value;
+    private readonly AuthConfig config = _options.Value;
 
     /// <summary>
     /// Registers a new user into the database.
@@ -28,33 +28,30 @@ public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHand
     /// Assumes username and password are already validated by the FluentValidation pipeline.
     /// </remarks>
     /// <returns>
-    /// A Result containing the created <see cref="UserSummary"/> on success, or a
+    /// A Result containing the registered <see cref="User"/> on success, or a
     /// <see cref="RegisterError"/> describing the failure.
     /// </returns>
-    public async Task<Result<UserSummary, RegisterError>> RegisterAsync(
+    public async Task<Result<User, RegisterError>> RegisterAsync(
         string username,
         string password
     )
     {
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-        User user = new() { Username = username, PasswordHash = passwordHash };
-
-        // coupled to postgres but dont plan on changing so idrc
-        try
+        // idk what to do here: my domain model User has an id field, but i cant know that until the db hands me back one and i need a model for passing user to database, so i'm using the one from domain layer, since if i were to use the one scaffolded into infrastructure then application would depend on infrastructure and thats wrong so i have to use the domain one or create a dto, but my question is, what is the purpose a user model in the domain in this app? or should i just remove id from it
+        User user = new() {Username = username, PasswordHash = passwordHash };
+        var result = await _userRepository.AddAsync(user);
+        if (result == UserRepositoryAddResult.Success)
         {
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
+            return user;
         }
-        catch (DbUpdateException ex)
-            when (ex.InnerException is PostgresException pgEx
-                && pgEx.SqlState == PostgresErrorCodes.UniqueViolation
-            )
+        else if (result == UserRepositoryAddResult.UsernameConflict)
         {
             return RegisterError.UsernameTaken;
         }
-
-        UserSummary resp = new(user.Id, user.Username, user.CreatedAt);
-        return resp;
+        else
+        {
+            throw new UnhandledFunctionPathException();
+        }
     }
 
     /// <summary>
@@ -69,7 +66,7 @@ public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHand
     /// </returns>
     public async Task<Result<AuthResponse, LoginError>> LoginAsync(string username, string password)
     {
-        User? user = await _db.Users.SingleOrDefaultAsync(u => u.Username == username);
+        User? user = await _userRepository.GetByUsernameAsync(username);
         string hashToVerify = user is null ? _dummyHash : user.PasswordHash;
         if (!BCrypt.Net.BCrypt.Verify(password, hashToVerify) || user is null)
             return LoginError.InvalidCredentials;
@@ -105,37 +102,35 @@ public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHand
         return resp;
     }
 
-    public async Task RevokeRefreshTokenAsync(long userId)
+    public async Task RevokeRefreshTokenAsync(long userId, CancellationToken ct = default)
     {
-        await _db.RefreshTokens.Where(r => r.UserId == userId).ExecuteDeleteAsync();
+        await _refreshTokenRepository.RevokeRefreshTokenAsync(userId, ct);
     }
 
+    // should be called something else i think
     // creates a new refresh token and assigns it to a given userId, if the user already has a token, it gets replaced.
     // returns a base64url encoded refresh token
-    private async Task<string> AssignNewRefreshToken(int userId)
+    private async Task<string> AssignNewRefreshToken(int userId, CancellationToken ct = default)
     {
         var now = DateTimeOffset.UtcNow;
 
-        byte[] rawRefreshToken = RandomNumberGenerator.GetBytes(_config.RefreshTokenSizeBytes);
+        byte[] rawRefreshToken = RandomNumberGenerator.GetBytes(config.RefreshTokenSizeBytes);
         byte[] refreshTokenHash = SHA256.HashData(rawRefreshToken);
-        DateTimeOffset refreshTokenExpiresAt = now.AddDays(_config.RefreshTokenLifetimeDays);
-        await _db.Database.ExecuteSqlAsync(
-            $"""
-            INSERT INTO refresh_tokens(token_hash, expires_at, user_id)
-            VALUES ({refreshTokenHash}, {refreshTokenExpiresAt}, {userId})
-            ON CONFLICT (user_id) DO UPDATE SET
-                token_hash = EXCLUDED.token_hash,
-                expires_at = EXCLUDED.expires_at,
-                created_at = now()
-            """
+        DateTimeOffset refreshTokenExpiresAt = now.AddDays(config.RefreshTokenLifetimeDays);
+        await _refreshTokenRepository.ReplaceRefreshTokenAsync(
+            userId,
+            refreshTokenHash,
+            refreshTokenExpiresAt,
+            ct
         );
         return Base64Url.EncodeToString(rawRefreshToken);
     }
 
+    // should be in jwt handler
     private string CreateAccessJwt(long userId)
     {
         long accessTokenExpiresAt = DateTimeOffset
-            .UtcNow.AddMinutes(_config.AccessTokenLifetimeMinutes)
+            .UtcNow.AddMinutes(config.AccessTokenLifetimeMinutes)
             .ToUnixTimeSeconds();
         return _jwtHandler.GenerateToken(userId, accessTokenExpiresAt);
     }
@@ -144,19 +139,19 @@ public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHand
         string refreshTokenBase64Url
     )
     {
-        byte[] rawRefreshToken = new byte[_config.RefreshTokenSizeBytes];
+        byte[] rawRefreshToken = new byte[config.RefreshTokenSizeBytes];
         if (
             !Base64Url.TryDecodeFromChars(
                 refreshTokenBase64Url,
                 rawRefreshToken,
                 out int bytesWritten
             )
-            || bytesWritten != _config.RefreshTokenSizeBytes
+            || bytesWritten != config.RefreshTokenSizeBytes
         )
             return RefreshTokenError.InvalidFormat;
 
         byte[] refreshTokenHash = SHA256.HashData(rawRefreshToken);
-        RefreshToken? refreshToken = await _db.RefreshTokens.FindAsync(refreshTokenHash);
+        RefreshToken? refreshToken = ;
         if (refreshToken is null)
             return RefreshTokenError.NotFound;
 

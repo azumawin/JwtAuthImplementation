@@ -1,5 +1,6 @@
 using JwtAuthImplementation.Auth.JwtHandling;
 using JwtAuthImplementation.Auth.JwtHandling.Dtos;
+using JwtAuthImplementation.Domain;
 using Microsoft.Extensions.Time.Testing;
 
 namespace JwtAuthImplementation.Tests.JwtHandling;

@@ -1,8 +1,9 @@
-using JwtAuthImplementation.Auth.Dtos;
+using JwtAuthImplementation.Application;
 using JwtAuthImplementation.Auth.JwtHandling.Dtos;
+using JwtAuthImplementation.Presentation.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
-namespace JwtAuthImplementation.Auth;
+namespace JwtAuthImplementation.Presentation;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -34,7 +35,7 @@ public class AuthController(AuthService _authService) : ControllerBase
         return Ok(result.Value);
     }
 
-    // probably badly named ngl
+    // probably badly named ngl maybe should be renewSession
     [HttpPost("refreshToken")]
     public async Task<ActionResult<RefreshSessionResponse>> RefreshToken(
         RefreshTokenRequest request

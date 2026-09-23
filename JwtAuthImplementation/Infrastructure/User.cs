@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace JwtAuthImplementation.Models;
+namespace JwtAuthImplementation.Infrastructure;
 
 public partial class User
 {

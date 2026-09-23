@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using JwtAuthImplementation.Models;
+using JwtAuthImplementation.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace JwtAuthImplementation.Data;
+namespace JwtAuthImplementation.Infrastructure;
 
 public partial class AppDbContext : DbContext
 {
