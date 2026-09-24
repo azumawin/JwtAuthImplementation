@@ -2,7 +2,8 @@
 
 this is a jwt auth implementation written without the microsoft identity / jwtbearer stuff. tokens
 are signed and verified by hand (see Auth/JwtHandling/JwtHandler.cs), passwords are hashed with
-bcrypt, and refresh tokens are stored in postgres as sha256 hashes.
+bcrypt after a sha256 + base64 pass since bcrypt ignores anything past 72 bytes, and refresh tokens
+are stored in postgres as sha256 hashes.
 
 ## structure
 

@@ -3,6 +3,7 @@
  */
 using System.Buffers.Text;
 using System.Security.Cryptography;
+using System.Text;
 using JwtAuthImplementation.Auth.Dtos;
 using JwtAuthImplementation.Auth.JwtHandling;
 using JwtAuthImplementation.Data;
@@ -17,7 +18,7 @@ namespace JwtAuthImplementation.Auth;
 public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHandler _jwtHandler)
 {
     private static readonly string _dummyHash = BCrypt.Net.BCrypt.HashPassword(
-        "DummyHashToPreventTimingAttacks"
+        PreHash("DummyHashToPreventTimingAttacks")
     );
     private readonly AuthConfig _config = options.Value;
 
@@ -36,7 +37,7 @@ public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHand
         string password
     )
     {
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(PreHash(password));
         User user = new() { Username = username, PasswordHash = passwordHash };
 
         // coupled to postgres but dont plan on changing so idrc
@@ -71,7 +72,7 @@ public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHand
     {
         User? user = await _db.Users.SingleOrDefaultAsync(u => u.Username == username);
         string hashToVerify = user is null ? _dummyHash : user.PasswordHash;
-        if (!BCrypt.Net.BCrypt.Verify(password, hashToVerify) || user is null)
+        if (!BCrypt.Net.BCrypt.Verify(PreHash(password), hashToVerify) || user is null)
             return LoginError.InvalidCredentials;
 
         string accessJwt = CreateAccessJwt(user.Id);
@@ -130,6 +131,15 @@ public class AuthService(AppDbContext _db, IOptions<AuthConfig> options, JwtHand
             """
         );
         return Base64Url.EncodeToString(rawRefreshToken);
+    }
+
+    // bcrypt only reads the first 72 bytes of the password, so anything longer gets silently
+    // truncated. sha256 first to get a fixed size digest, then base64 it because bcrypt also stops
+    // at the first null byte and a raw digest can contain one.
+    private static string PreHash(string password)
+    {
+        byte[] digest = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+        return Convert.ToBase64String(digest);
     }
 
     private string CreateAccessJwt(long userId)
