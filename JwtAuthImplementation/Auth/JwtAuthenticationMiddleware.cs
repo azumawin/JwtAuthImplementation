@@ -7,7 +7,14 @@ public class JwtAuthenticationMiddleware(RequestDelegate _next)
 {
     public async Task Invoke(HttpContext context, JwtHandler _jwtHandler)
     {
-        var jwt = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+        // the scheme is case insensitive per rfc 7235, and a token sent with no scheme at all
+        // isnt valid either, so strip the prefix
+        const string scheme = "Bearer ";
+        string authorization = context.Request.Headers.Authorization.ToString();
+        string jwt = authorization.StartsWith(scheme, StringComparison.OrdinalIgnoreCase)
+            ? authorization[scheme.Length..].Trim()
+            : "";
+
         bool result = _jwtHandler.VerifyJwt(jwt);
         context.Items.Add("isValidJwt", result);
 
