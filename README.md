@@ -4,6 +4,17 @@ this is a jwt auth implementation written without the microsoft identity / jwtbe
 are signed and verified by hand (see Auth/JwtHandling/JwtHandler.cs), passwords are hashed with
 bcrypt, and refresh tokens are stored in postgres as sha256 hashes.
 
+## structure
+
+the api is split by feature, a feature folder owns everything it needs. Auth/ has the controller,
+the service, its dtos and validators and the jwt handling, WeatherApi/ is just the demo endpoint and
+its model.
+
+the database side is separate because its generated. Entities/ is one class per table and Data/ has
+the appdbcontext, both come out of `make scaffold` so dont hand edit them or move them somewhere
+else, they get overwritten. Shared/ is for stuff that belongs to no feature and isnt persisted,
+right now thats only Result.
+
 ## running it
 
 make a .env file, the example has working values so you can just copy it:

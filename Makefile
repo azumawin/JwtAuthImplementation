@@ -6,6 +6,6 @@ scaffold:
 
 	dotnet ef dbcontext scaffold "$$Db__ConnString" Npgsql.EntityFrameworkCore.PostgreSQL \
 		--context AppDbContext \
-		--output-dir Models \
+		--output-dir Entities \
 		--context-dir Data \
 		--force

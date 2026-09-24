@@ -1,5 +1,4 @@
 using JwtAuthImplementation.Auth;
-using JwtAuthImplementation.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace JwtAuthImplementation.WeatherApi;

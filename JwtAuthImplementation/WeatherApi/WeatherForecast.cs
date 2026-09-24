@@ -1,4 +1,4 @@
-namespace JwtAuthImplementation.Models;
+namespace JwtAuthImplementation.WeatherApi;
 
 public class WeatherForecast
 {

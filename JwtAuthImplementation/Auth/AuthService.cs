@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using JwtAuthImplementation.Auth.Dtos;
 using JwtAuthImplementation.Auth.JwtHandling;
 using JwtAuthImplementation.Data;
-using JwtAuthImplementation.Models;
+using JwtAuthImplementation.Entities;
 using JwtAuthImplementation.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

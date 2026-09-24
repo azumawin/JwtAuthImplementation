@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using JwtAuthImplementation.Models;
+using JwtAuthImplementation.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace JwtAuthImplementation.Data;
