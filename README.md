@@ -69,8 +69,8 @@ POST /api/Auth/login with the same body. gives back 200 and both tokens:
 copy both of these somewhere, you need them for the next steps. the access jwt lives for 10 minutes
 and the refresh token for 30 days (configured in appsettings.json under Auth).
 
-if you want to see what is inside the jwt, paste it into jwt.io. the payload only has sub (user id),
-exp and iat. the signature is hmac sha256 over the header and payload with the secret key from .env.
+if you want to see what is inside the jwt, paste it into jwt.io. the payload has sub (user id), exp,
+iat and iss, which is always JwtAuthImplementation
 
 ### 3. call a protected endpoint
 
@@ -137,3 +137,7 @@ then just do:
 ```
 make scaffold
 ```
+
+## known issues
+
+things i found while testing that arent fixed yet are written down in [bugs.md](bugs.md).
