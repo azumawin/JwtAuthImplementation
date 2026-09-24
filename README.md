@@ -113,6 +113,9 @@ tradeoff.
 
 ## unit tests
 
+TODO: need to add more tests, especially for authservice and integration tests for happy path at
+least
+
 unit tests for the token handler:
 
 ```
