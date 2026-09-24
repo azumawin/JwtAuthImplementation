@@ -37,8 +37,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(DB_CONN
 builder.Services.AddSingleton(_ => new JwtHandler(SECRET_KEY, TimeProvider.System));
 builder.Services.AddScoped<AuthService>();
 
-// validators
-// registrate all validators, not just LoginRequestValidator?? wtf is an assembly idr get this
+// register all validators
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 

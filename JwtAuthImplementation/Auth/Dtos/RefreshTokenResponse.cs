@@ -1,3 +1,3 @@
 namespace JwtAuthImplementation.Auth.Dtos;
 
-public record RefreshSessionResponse(string AccessToken, string RefreshToken);
+public record RefreshSessionResponse(string AccessJwt, string RefreshToken);

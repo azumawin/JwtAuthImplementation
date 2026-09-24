@@ -34,7 +34,6 @@ public class AuthController(AuthService _authService) : ControllerBase
         return Ok(result.Value);
     }
 
-    // probably badly named ngl
     [HttpPost("refreshToken")]
     public async Task<ActionResult<RefreshSessionResponse>> RefreshToken(
         RefreshTokenRequest request
